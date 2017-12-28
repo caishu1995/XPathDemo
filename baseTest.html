@@ -1,0 +1,129 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title></title>
+</head>
+
+<body>
+    <div id="iframeDiv"></div>
+    <script>
+       
+        ///根据url发送请求，处理了超时、路径错误、error的情况
+        ///url: 请求路径
+        ///callbackFunction:成功之后的回调函数
+        function sendRequestFunction(url, callbackFunction) {
+            var xmlHttp = new XMLHttpRequest();
+            //设置跨域访问请求对象
+            if ("withCredentials" in xmlHttp) {
+                // "withCredentials"属性是XMLHTTPRequest2中独有的
+                xmlHttp.open('GET', url, true);
+            } else if (typeof XDomainRequest != "undefined") {
+                // 检测是否XDomainRequest可用
+                xmlHttp = new XDomainRequest();
+                xmlHttp.open('GET', url);
+            } else {
+                alert('抱歉，不支持CORS');
+                return;
+            }
+
+            //设置计时器，防止超时
+            var timedout = false;
+            var timer = setTimeout(function () {
+                timedout = true;
+                xmlHttp.abort();
+            }, 5000);
+
+            xmlHttp.onreadystatechange = function () {
+                if (xmlHttp.readyState != 4) { return; }
+                if (timedout) { return; }
+                clearTimeout(timer);
+                if (xmlHttp.status === 200) {
+                    callbackFunction(xmlHttp.responseText);
+                }
+                if (xmlHttp.status === 404) {
+                    alert("路径请求错误");
+                }
+            };
+            xmlHttp.onerror = function () {
+                alert('抱歉，请求错误');
+            };
+            
+            xmlHttp.send();
+        }
+        ///获得接收到的网页数据的特定内容
+        ///XMLDocumentObj: xmlDocument对象
+        ///path: 查询的XPath路径
+        ///disposeEveryNodeFunction:处理每个查询出的节点的函数，参数为每个查询出的节点
+        function getSpecialContent(XMLDocumentObj, path, disposeEveryNodeFunction) {
+            if (window.ActiveXObject) {
+                // code for IE
+                XMLDocumentObj.setProperty("SelectionLanguage", "XPath");
+                var nodes = XMLDocumentObj.selectNodes(path);
+                for (i = 0; i < nodes.length; i++) {
+                    disposeEveryNodeFunction(nodes[i]);
+                }
+            } else if (document.implementation && document.implementation.createDocument) {
+                // code for Mozilla, Firefox, Opera, etc.
+                var nodes = XMLDocumentObj.evaluate(path, XMLDocumentObj, null, XPathResult.ANY_TYPE, null);
+                var result = nodes.iterateNext();
+                while (result) {
+                    disposeEveryNodeFunction(result);
+                    result = nodes.iterateNext();
+                }
+            }
+        }
+        ///给url发送请求并获得内容
+        ///url: 请求路径
+        ///path: 查询的XPath路径
+        ///disposeEveryNodeFunction:处理每个查询出的节点的函数，参数为每个查询出的节点
+        function getAndFindFunction(url, path, disposeEveryNodeFunction) {
+            sendRequestFunction(url, function (data) {
+                //将字符串转成XML Document 对象
+                var domParser = new DOMParser();
+                var xmlDocumentObj = domParser.parseFromString(data, 'text/html');
+                ////发送请求并处理每个节点
+                getSpecialContent(xmlDocumentObj, path, disposeEveryNodeFunction);
+            });
+        }
+
+        ///创建iframe，监视是否允许被添加在iframe
+        ///url： url
+        function createIFrame(url) {
+            var iframe = document.createElement("iframe");
+            iframe.src = url;
+            document.getElementById("iframeDiv").innerHTML = "";
+            document.getElementById("iframeDiv").appendChild(iframe);
+        }
+    </script>
+    <script>
+        ///亚马逊
+        //var url = "https://www.amazon.co.uk/MoKo-Holder-Premium-Leather-Carrying-Rose-Gold/dp/B01J0SASLS/ref=sr_1_4?s=electronics&ie=UTF8&qid=1511488213&sr=1-4&keywords=moko";
+        //var url = "https://www.amazon.co.uk/MoKo-Holder-Premium-Leather-Carrying-Rose-Gold/dp/B01J0SASLS/ref=sr_1_4";
+        ///淘宝
+        //var url = "https://detail.tmall.com/item.htm?id=556337377918&ali_trackid=2:mm_12811289_2424861_70676714:1511489271_331_1899015223&spm=a21ap.7874209.10006.1&pvid=200_10.177.101.172_258_1511489270054";
+        ///天猫
+        //var url = "https://detail.tmall.com/item.htm?spm=a220m.1000858.1000725.1.72adf80cXCGigD&id=538273506984&skuId=3683350622632&areaId=440300&user_id=268451883&cat_id=2&is_b=1&rn=0d6a4bcd9ad62eff0caeb7b5fd94a955";
+        ///京东
+        //var url = "https://item.jd.com/5503074.html";
+        ///易贝
+        //var url = "https://www.ebay.com.hk/itm/Loake-mens-leather-pull-on-Chelsea-ankle-boots-in-chestnut-brown-UK-size-9/222730695846?hash=item33dbc8b4a6:g:yeoAAOSwTEJaFV22";
+        //苏宁
+        //var url = "https://product.suning.com/0000000000/661610818.html?srcpoint=pindao_caidian_45537115244_prod02";
+        //一号店
+        //var url = "http://item.yhd.com/4013652.html";
+
+        ///其他页面
+        //var url = "http://192.168.2.100:900/S/h5htm.php";
+        var url = "http://localhost:51863//Index/getPageData";
+
+        createIFrame(url);//测试iframe是否正常展示
+        getAndFindFunction(url, "//*[@id='a1']", function (node) {
+            if (node.childNodes.length > 0) {
+                document.write(node.childNodes[0].nodeValue);
+                document.write("<br>");
+            }
+        });//查看跨域访问是否正常
+    </script>
+</body>
+</html>

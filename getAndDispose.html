@@ -1,0 +1,27 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+</head>
+
+<body>
+    <script src="demo.js"></script>
+    <script>
+        var url = "http://192.168.2.100:900/S/h5htm.php";
+
+        var nodes = $PAndGHTML.getAndFindFunction(url, "//*[@id='a1']", 5000);//查找数据
+        //处理节点
+        if (nodes != null) {
+            for (i = 0; i < nodes.length; i++) {
+                if (nodes[i].childNodes.length > 0) {
+                    document.write(nodes[i].childNodes[0].nodeValue);
+                    document.write("<br>");
+                }
+            }
+        }
+        var aa = nodes[0].childNodes[0].nodeValue.replace(/\ +/g, "").replace(/[ ]/g, "").replace(/[\r\n]/g, "");
+        document.cookie = "a1=" + nodes[0].childNodes[0].nodeValue.replace(/\ +/g, "").replace(/[ ]/g, "").replace(/[\r\n]/g, ""); //去掉空格回车换行
+    </script>
+</body>
+</html>

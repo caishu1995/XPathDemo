@@ -1,0 +1,18 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title></title>
+</head>
+<body>
+    aaa,can you see me
+    <div id="aa"></div>
+    <script>
+        window.addEventListener('message', function (e) {
+            if (e.source != window.parent) return;
+            document.getElementById("aa").innerHTML += e.data;
+            window.parent.postMessage("你好哦，我们在对话哦", '*');
+        }, false);
+    </script>
+</body>
+</html>
