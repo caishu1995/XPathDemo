@@ -22,11 +22,3 @@ getAndDispose.html
 		2、jquery-1.10.2.min.js
 	注：
 		这个是在上个界面的基础之上封装而来
-
-messagePart1.html
-	编写目的：
-		1、界面间数据通信
-	使用技术：
-		1、postmessage
-	相关代码：
-		1、messagePart2.html
